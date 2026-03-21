@@ -191,3 +191,43 @@ export const createPost = async (req, res, next) => {
     next(err);
   }
 };
+
+export const search = async (req, res, next) => {
+  try {
+    const { page, sort, limit, term } = req.query;
+    const searchTerm = term || "";
+
+    const pageNumber = Number(page) || 1;
+    const limitNumber = Number(limit) || 10;
+
+    const post = await prisma.post.findMany({
+      where: {
+        published: true,
+        OR: [
+          { title: { contains: searchTerm, mode: "insensitive" } },
+          { text: { contains: searchTerm, mode: "insensitive" } },
+          {
+            author: { username: { contains: searchTerm, mode: "insensitive" } },
+          },
+        ],
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            username: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: sort === "asc" ? "asc" : "desc",
+      },
+      skip: (pageNumber - 1) * limitNumber,
+      take: limitNumber,
+    });
+    res.status(200).json(post);
+  } catch (err) {
+    console.error(err);
+    next(err);
+  }
+};

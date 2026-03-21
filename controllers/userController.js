@@ -91,43 +91,70 @@ export const getAllUsers = async (req, res, next) => {
 
 export const getUser = async (req, res, next) => {
   try {
+    if (req.user.id !== req.params.id) {
+      return res.status(403).json({ msg: "Forbidden" });
+    }
     const user = await prisma.user.findUnique({
-      where: {
-        id: req.params.id,
-      },
+      where: { id: req.params.id },
       select: {
         id: true,
         first_name: true,
         last_name: true,
         username: true,
-        email: true,
-        role: true,
         createdAt: true,
-        posts: true,
-        comments: true,
+        posts: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            createdAt: true,
+          },
+        },
+        comments: {
+          select: {
+            id: true,
+            text: true,
+            postId: true,
+            createdAt: true,
+          },
+        },
+        email:
+          req.user.id === req.params.id || req.user.role === "AUTHOR"
+            ? true
+            : undefined,
+        role:
+          req.user.id === req.params.id || req.user.role === "AUTHOR  "
+            ? true
+            : undefined,
       },
     });
+
+    if (!user) return res.status(404).json({ msg: "User not found" });
+
     res.status(200).json(user);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ msg: "internal server error occured." });
     next(err);
   }
 };
 
 export const updateUser = async (req, res, next) => {
   try {
+    if (req.user.id !== req.params.id) {
+      return res.status(403).json({ msg: "Forbidden" });
+    }
+
+    const data = {};
+    if (req.body.first_name) data.first_name = req.body.first_name;
+    if (req.body.last_name) data.last_name = req.body.last_name;
+    if (req.body.username) data.username = req.body.username;
+    if (req.body.role) data.role = req.body.role;
+    if (req.body.email) data.email = req.body.email;
     const user = await prisma.user.update({
       where: {
         id: req.params.id,
       },
-      data: {
-        first_name: req.body.first_name,
-        last_name: req.body.last_name,
-        username: req.body.username,
-        email: req.body.email,
-        role: req.body.role,
-      },
+      data,
       select: {
         id: true,
         first_name: true,
@@ -259,3 +286,38 @@ export const loginUser = [
     }
   },
 ];
+
+export const getMe = async (req, res, next) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: {
+        id: true,
+        username: true,
+        posts: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            createdAt: true,
+          },
+        },
+        comments: {
+          select: {
+            id: true,
+            text: true,
+            postId: true,
+            createdAt: true,
+          },
+        },
+      },
+    });
+
+    if (!user) return res.status(404).json({ msg: "User not found." });
+
+    res.status(200).json(user);
+  } catch (err) {
+    console.error(err);
+    next(err);
+  }
+};
