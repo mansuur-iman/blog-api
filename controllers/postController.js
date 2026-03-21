@@ -15,12 +15,14 @@ export const getAllPosts = async (req, res, next) => {
         id: true,
         title: true,
         text: true,
+        description: true,
+        imageUrl: true,
         author: {
           select: {
+            id: true,
             username: true,
           },
         },
-        authorId: true,
         published: true,
         createdAt: true,
         updatedAt: true,
@@ -55,12 +57,14 @@ export const getPost = async (req, res, next) => {
         id: true,
         title: true,
         text: true,
+        description: true,
+        imageUrl: true,
         author: {
           select: {
+            id: true,
             username: true,
           },
         },
-        authorId: true,
         published: true,
         createdAt: true,
         updatedAt: true,
@@ -88,24 +92,28 @@ export const getPost = async (req, res, next) => {
 
 export const updatePost = async (req, res, next) => {
   try {
+    const data = {};
+    if (req.body.title) data.title = req.body.title;
+    if (req.body.text) data.text = req.body.text;
+    if (req.body.description) data.description = req.body.description;
+    if (req.body.imageUrl) data.imageUrl = req.body.imageUrl;
     const post = await prisma.post.update({
       where: {
         id: req.params.id,
       },
-      data: {
-        title: req.body.title,
-        text: req.body.text,
-      },
+      data,
       select: {
         id: true,
         title: true,
         text: true,
+        description: true,
+        imageUrl: true,
         author: {
           select: {
+            id: true,
             username: true,
           },
         },
-        authorId: true,
         published: true,
         createdAt: true,
         updatedAt: true,
@@ -157,6 +165,8 @@ export const createPost = async (req, res, next) => {
       data: {
         title: req.body.title,
         text: req.body.text,
+        description: req.body.description || "",
+        imageUrl: req.body.imageUrl || "",
         authorId: req.user.userId,
         published: req.body.published ?? false,
       },
@@ -164,12 +174,14 @@ export const createPost = async (req, res, next) => {
         id: true,
         title: true,
         text: true,
+        description: true,
+        imageUrl: true,
         author: {
           select: {
+            id: true,
             username: true,
           },
         },
-        authorId: true,
         published: true,
         createdAt: true,
         updatedAt: true,
