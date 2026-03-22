@@ -97,6 +97,9 @@ export const updatePost = async (req, res, next) => {
     if (req.body.text) data.text = req.body.text;
     if (req.body.description) data.description = req.body.description;
     if (req.body.imageUrl) data.imageUrl = req.body.imageUrl;
+    if (req.body.published !== undefined) {
+      data.published = req.body.published;
+    }
     const post = await prisma.post.update({
       where: {
         id: req.params.id,
