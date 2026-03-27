@@ -18,7 +18,7 @@ export const verifyToken = async (req, res, next) => {
 };
 
 export const isAuthor = async (req, res, next) => {
-  if (req.user && req.user.role === "READER") {
+  if (req.user && req.user.role === "AUTHOR") {
     return next();
   }
 
