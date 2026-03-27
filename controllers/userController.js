@@ -263,12 +263,9 @@ export const loginUser = [
       const match = await bcrypt.compare(password, user.password);
 
       if (!match) {
-        return (
-          res.status(401),
-          json({
-            msg: "Incorrect email or password.",
-          })
-        );
+        return res.status(401).json({
+          msg: "Incorrect email or password.",
+        });
       }
 
       const token = jwt.sign(
@@ -279,6 +276,12 @@ export const loginUser = [
       res.json({
         msg: "Login successfully.",
         token: token,
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          role: user.role,
+        },
       });
     } catch (err) {
       console.error(err);
