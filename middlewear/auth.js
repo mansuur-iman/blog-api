@@ -18,9 +18,11 @@ export const verifyToken = async (req, res, next) => {
 };
 
 export const isAuthor = async (req, res, next) => {
-  if (req.user.role === "READER") {
+  if (req.user && req.user.role === "READER") {
     return next();
   }
 
-  return res.status(401).json({ msg: "not authorized for this action." });
+  return res
+    .status(403)
+    .json({ msg: "forbidden: not authorized for this action." });
 };
