@@ -297,6 +297,9 @@ export const getMe = async (req, res, next) => {
       select: {
         id: true,
         username: true,
+        first_name: true,
+        last_name: true,
+        email: true,
         posts: {
           select: {
             id: true,
