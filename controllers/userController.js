@@ -302,6 +302,7 @@ export const getMe = async (req, res, next) => {
             id: true,
             title: true,
             description: true,
+            published: true,
             createdAt: true,
           },
         },
