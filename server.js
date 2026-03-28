@@ -16,12 +16,16 @@ server.use("/api/v1/users", userRouter);
 server.use("/api/v1/posts", postRouter);
 server.use("/api/v1", commentRouter);
 
-server.use((err, req, res, nex) => {
-  if (err) {
-    return res.status(500).json({ msg: "Internal server error occured." });
-  }
-});
+server.use((err, req, res, next) => {
+  console.error("--- SERVER ERROR ---");
+  console.error(err.stack);
+  console.error("--------------------");
 
+  res.status(err.status || 500).json({
+    msg: err.message || "Internal server error occurred.",
+    error: err,
+  });
+});
 const PORT = process.env.PORT;
 
 server.listen(PORT, () => {
