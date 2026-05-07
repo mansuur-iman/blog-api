@@ -1,148 +1,72 @@
-# Blog API
+# 📝 Blog API
 
-A REST API for a fullstack blogging platform built with Node.js, Express, Prisma, and PostgreSQL.
+A RESTful API powering a fullstack blogging platform — handling authentication, post management, comments, and role-based access control.
 
-The API powers two separate React frontends:
-
-* **Blog Project** — public reader application
-* **Blog Author** — author/admin dashboard
-
-It handles authentication, authorization, blog management, comments, and database operations.
+Built with **Node.js**, **Express**, **Prisma**, and **PostgreSQL**.
 
 ---
 
-# Frontend Applications
+## 🌐 Live Demos
 
-## Blog Project (Reader Frontend)
-
-### LIVE DEMO
-https://blog-reader-five.vercel.app/
-
-The public-facing frontend where users can:
-
-* Create accounts
-* Login
-* Choose a role during signup (`READER` or `AUTHOR`)
-* Browse published blog posts
-* Read full articles
-* Comment on posts
-* Search for posts
-
-### Tech Stack
-
-* React
-* Vite
-* React Router
-* CSS Modules
-
-### Repository
-
-```bash
-git clone git@github.com:mansuur-iman/blog-project.git
-```
-
-Run locally:
-
-```bash
-cd blog-project
-npm install
-npm run dev
-```
+| App | URL |
+|-----|-----|
+| Reader Frontend | [blog-reader-five.vercel.app](https://blog-reader-five.vercel.app/) |
+| Author Dashboard | [blog-author-ten.vercel.app/login](https://blog-author-ten.vercel.app/login) |
 
 ---
 
-## Blog Author (Author Dashboard)
+## 📦 Project Overview
 
-The dashboard frontend for authors to manage blog content.
+This API powers two separate React frontends:
 
-### LIVE DEMO
-https://blog-author-ten.vercel.app/login
+**Blog Project** — public reader application where users can browse, read, comment on, and search posts.
 
-Authors can:
-
-* Login
-* Create posts
-* Edit posts
-* Delete posts
-* Publish or unpublish posts
-* View comments
-* Delete comments
-* Manage authored content
-
-### Tech Stack
-
-* React
-* Vite
-* React Router
-* CSS Modules
-
-### Repository
-
-```bash
-git clone git@github.com:mansuur-iman/blog-author.git
-```
-
-Run locally:
-
-```bash
-cd blog-author
-npm install
-npm run dev
-```
+**Blog Author** — author/admin dashboard where authors can create, edit, publish, and delete content.
 
 ---
 
-# Tech Stack
+## ⚙️ Tech Stack
 
-## Backend
+### Backend
+- Node.js + Express.js
+- Prisma ORM
+- PostgreSQL
+- JWT Authentication
+- bcrypt
 
-* Node.js
-* Express.js
-* Prisma ORM
-* PostgreSQL
-* JWT Authentication
-* bcrypt
-
----
-
-# Features
-
-## Authentication
-
-* User registration
-* User login
-* JWT authentication
-* Protected routes
-* Role-based authorization
+### Frontend (both apps)
+- React + Vite
+- React Router
+- CSS Modules
 
 ---
 
-## Posts
+## ✨ Features
 
-* Create posts
-* Edit posts
-* Delete posts
-* Fetch all posts
-* Fetch single posts
-* Search posts
-* Publish/unpublish posts
+**Authentication & Authorization**
+- User registration and login
+- JWT-protected routes
+- Role-based access control (`READER` / `AUTHOR`)
 
----
+**Posts**
+- Create, read, update, delete posts
+- Publish / unpublish toggle
+- Search posts
 
-## Comments
-
-* Create comments
-* Fetch comments
-* Update comments
-* Delete comments
+**Comments**
+- Create, read, update, delete comments
+- Comments scoped to individual posts
 
 ---
 
-# Database Schema
-
-## User
+## 🗄️ Database Schema
 
 ```prisma
+enum Role {
+  READER
+  AUTHOR
+}
+
 model User {
   id         String    @id @default(uuid())
   first_name String
@@ -155,20 +79,7 @@ model User {
   comments   Comment[]
   createdAt  DateTime  @default(now())
 }
-```
 
-## Role
-
-```prisma
-enum Role {
-  READER
-  AUTHOR
-}
-```
-
-## Post
-
-```prisma
 model Post {
   id          String    @id @default(uuid())
   title       String
@@ -184,11 +95,7 @@ model Post {
 
   @@index([authorId])
 }
-```
 
-## Comment
-
-```prisma
 model Comment {
   id        String   @id @default(uuid())
   text      String
@@ -204,91 +111,69 @@ model Comment {
 
 ---
 
-# API Routes
+## 🛣️ API Routes
 
-## User Routes
+### Users
 
-```txt
-GET    /users
-POST   /users/register
-POST   /users/login
-GET    /users/me
-GET    /users/:id
-PUT    /users/:id
-DELETE /users/:id
-```
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/users` | Get all users |
+| `POST` | `/users/register` | Register a new user |
+| `POST` | `/users/login` | Login |
+| `GET` | `/users/me` | Get current user |
+| `GET` | `/users/:id` | Get user by ID |
+| `PUT` | `/users/:id` | Update user |
+| `DELETE` | `/users/:id` | Delete user |
 
----
+### Posts
 
-## Post Routes
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/posts` | Get all posts |
+| `POST` | `/posts` | Create a post *(Author only)* |
+| `GET` | `/posts/search` | Search posts |
+| `GET` | `/posts/:id` | Get single post |
+| `PUT` | `/posts/:id` | Update post *(Author only)* |
+| `DELETE` | `/posts/:id` | Delete post *(Author only)* |
 
-```txt
-GET    /posts
-POST   /posts
-GET    /posts/search
-GET    /posts/:id
-PUT    /posts/:id
-DELETE /posts/:id
-```
+### Comments
 
-### Protected Author Routes
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/posts/:postId/comments` | Get comments for a post |
+| `POST` | `/posts/:postId/comments` | Add a comment |
+| `PUT` | `/comments/:id` | Update a comment |
+| `DELETE` | `/comments/:id` | Delete a comment |
 
-The following routes require author access:
-
-* POST `/posts`
-* PUT `/posts/:id`
-* DELETE `/posts/:id`
-
----
-
-## Comment Routes
-
-```txt
-GET    /posts/:postId/comments
-POST   /posts/:postId/comments
-PUT    /comments/:id
-DELETE /comments/:id
-```
+> Routes marked *Author only* require a valid JWT and `AUTHOR` role.
 
 ---
 
-# Authentication Middleware
+## 🔐 Middleware
 
-## verifyToken
-
-Protects authenticated routes using JWT.
-
-## isAuthor
-
-Restricts access to author-only routes.
+- **`verifyToken`** — validates the JWT on protected routes
+- **`isAuthor`** — restricts access to author-only operations
 
 ---
 
-# Installation
+## 🚀 Getting Started
 
-Clone the repository:
+### 1. Clone the repository
 
 ```bash
 git clone git@github.com:mansuur-iman/blog-api.git
-```
-
-Navigate into the project:
-
-```bash
 cd blog-api
 ```
 
-Install dependencies:
+### 2. Install dependencies
 
 ```bash
 npm install
 ```
 
----
+### 3. Configure environment variables
 
-# Environment Variables
-
-Create a `.env` file in the root directory:
+Create a `.env` file in the project root:
 
 ```env
 DATABASE_URL=your_postgresql_database_url
@@ -296,25 +181,14 @@ JWT_SECRET=your_jwt_secret
 PORT=8080
 ```
 
----
-
-# Prisma Setup
-
-Run migrations:
+### 4. Set up the database
 
 ```bash
 npx prisma migrate dev
-```
-
-Generate Prisma client:
-
-```bash
 npx prisma generate
 ```
 
----
-
-# Start Development Server
+### 5. Start the development server
 
 ```bash
 npm run dev
@@ -322,39 +196,51 @@ npm run dev
 
 ---
 
-# Production
-
-Build the application:
+## 🏗️ Build & Production
 
 ```bash
+# Build
 npm run build
-```
 
-Start production server:
-
-```bash
+# Start production server
 npm start
 ```
 
 ---
 
-# Project Structure
+## 📁 Project Structure
 
-```txt
+```
 blog-api/
-├── prisma/
-├── generated/
-├── controllers/
-├── routes/
-├── middlewear/
-├── utils/
-├── app.js
-├── server.js
+├── prisma/           # Prisma schema and migrations
+├── generated/        # Prisma client output
+├── controllers/      # Route handler logic
+├── routes/           # Express route definitions
+├── middlewear/       # Auth and role middleware
+├── utils/            # Helper functions
+├── app.js            # Express app setup
+├── server.js         # Server entry point
 └── package.json
 ```
 
 ---
 
-# Author
+## 🖥️ Frontend Repositories
+
+### Blog Project (Reader)
+```bash
+git clone git@github.com:mansuur-iman/blog-project.git
+cd blog-project
+npm install
+npm run dev
+```
+
+### Blog Author (Dashboard)
+```bash
+git clone git@github.com:mansuur-iman/blog-author.git
+cd blog-author
+npm install
+npm run dev
+```
 
 Built as a fullstack blogging platform using Node.js, Express, Prisma, PostgreSQL, React, and Vite.
