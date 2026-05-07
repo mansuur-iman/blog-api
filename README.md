@@ -1,157 +1,36 @@
-<div align="center">
+# blog-api
 
-# Blog API
-
-A REST API powering a fullstack blogging platform with role-based access for readers and authors.
-
-**Node.js · Express · Prisma · PostgreSQL · JWT**
-
-[Reader App](https://blog-reader-five.vercel.app/) · [Author Dashboard](https://blog-author-ten.vercel.app/login)
-
-</div>
+> REST API backend for a fullstack blogging platform. Powers two separate React clients — a public reader app and a private author dashboard — with JWT authentication and role-based access control.
 
 ---
 
-## Overview
+## Table of Contents
 
-This API serves as the backend for two separate React frontends:
-
-- **Reader** — lets users browse published posts, read articles, search content, and leave comments
-- **Author** — gives authors a private dashboard to write, edit, publish, and delete their content
-
-Both frontends authenticate through this API using JWTs, and access is gated by role (`READER` or `AUTHOR`).
+- [Stack](#stack)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
+- [Environment Variables](#environment-variables)
+- [API Reference](#api-reference)
+  - [Authentication](#authentication)
+  - [Users](#users)
+  - [Posts](#posts)
+  - [Comments](#comments)
+- [Authorization](#authorization)
+- [Error Handling](#error-handling)
+- [Frontend Clients](#frontend-clients)
 
 ---
 
-## Tech Stack
+## Stack
 
-| Layer | Technology |
-|-------|-----------|
+| Concern | Technology |
+|---|---|
 | Runtime | Node.js |
 | Framework | Express.js |
 | ORM | Prisma |
 | Database | PostgreSQL |
-| Auth | JWT + bcrypt |
-
----
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js 18+
-- A PostgreSQL database
-
-### Installation
-
-```bash
-git clone git@github.com:mansuur-iman/blog-api.git
-cd blog-api
-npm install
-```
-
-### Environment Variables
-
-Create a `.env` file in the root:
-
-```env
-DATABASE_URL=your_postgresql_connection_url
-JWT_SECRET=your_jwt_secret
-PORT=8080
-```
-
-### Database Setup
-
-```bash
-npx prisma migrate dev
-npx prisma generate
-```
-
-### Running the Server
-
-```bash
-# Development
-npm run dev
-
-# Production
-npm run build
-npm start
-```
-
----
-
-## API Reference
-
-All routes are prefixed with `/api/v1`.
-
-Authentication uses Bearer tokens — include the JWT in the `Authorization` header:
-
-```
-Authorization: Bearer <token>
-```
-
----
-
-### Users
-
-| Method | Route | Auth | Description |
-|--------|-------|------|-------------|
-| `POST` | `/users/register` | Public | Create a new account |
-| `POST` | `/users/login` | Public | Login and receive a JWT |
-| `GET` | `/users/me` | 🔒 | Get your own profile |
-| `GET` | `/users` | 🔒 | Get all users |
-| `GET` | `/users/:id` | 🔒 | Get a user by ID |
-| `PUT` | `/users/:id` | 🔒 | Update a user |
-| `DELETE` | `/users/:id` | 🔒 | Delete a user |
-
----
-
-### Posts
-
-| Method | Route | Auth | Description |
-|--------|-------|------|-------------|
-| `GET` | `/posts` | 🔒 | Get all posts |
-| `GET` | `/posts/search` | 🔒 | Search posts by keyword |
-| `GET` | `/posts/:id` | 🔒 | Get a single post |
-| `POST` | `/posts` | 🔒 ✍️ | Create a post |
-| `PUT` | `/posts/:id` | 🔒 ✍️ | Update a post |
-| `DELETE` | `/posts/:id` | 🔒 ✍️ | Delete a post |
-
----
-
-### Comments
-
-| Method | Route | Auth | Description |
-|--------|-------|------|-------------|
-| `GET` | `/posts/:postId/comments` | 🔒 | Get comments on a post |
-| `POST` | `/posts/:postId/comments` | 🔒 | Add a comment |
-| `PUT` | `/comments/:id` | 🔒 | Update a comment |
-| `DELETE` | `/comments/:id` | 🔒 | Delete a comment |
-
-> 🔒 Requires a valid JWT &nbsp;&nbsp; ✍️ Requires `AUTHOR` role
-
----
-
-## Middleware
-
-**`verifyToken`** — Decodes and validates the JWT on every protected route. Returns `401` if the token is missing or invalid.
-
-**`isAuthor`** — Runs after `verifyToken`. Checks that the authenticated user has the `AUTHOR` role. Returns `403` if not.
-
----
-
-## Error Handling
-
-A global error handler catches all unhandled errors and responds with:
-
-```json
-{
-  "msg": "Something went wrong.",
-  "error": {}
-}
-```
-
-Status defaults to `500` unless the thrown error includes a `.status` field.
+| Authentication | JSON Web Tokens (JWT) |
+| Password hashing | bcrypt |
 
 ---
 
@@ -159,22 +38,183 @@ Status defaults to `500` unless the thrown error includes a `.status` field.
 
 ```
 blog-api/
-├── prisma/           # Schema and migrations
-├── generated/        # Prisma generated client
-├── controllers/      # Business logic per resource
-├── routes/           # Express route definitions
-├── middlewear/       # Auth middleware
-├── utils/            # Shared utilities
-├── app.js            # Express app + route wiring
-└── server.js         # Server entry point
+├── prisma/
+│   └── schema.prisma        # Data models and relations
+├── controllers/
+│   ├── userController.js
+│   ├── postController.js
+│   └── commentController.js
+├── routes/
+│   ├── userRouter.js
+│   ├── postRouter.js
+│   └── commentRouter.js
+├── middlewear/
+│   └── auth.js              # verifyToken, isAuthor
+├── utils/
+├── app.js                   # Express app, middleware, route mounting
+├── server.js                # HTTP server entry point
+└── .env
 ```
 
 ---
 
-## Related Repositories
+## Getting Started
 
-| Repo | Description |
-|------|-------------|
-| [blog-project](https://github.com/mansuur-iman/blog-project) | Reader frontend (React + Vite) |
+**1. Clone the repository**
+
+```bash
+git clone git@github.com:mansuur-iman/blog-api.git
+cd blog-api
+```
+
+**2. Install dependencies**
+
+```bash
+npm install
+```
+
+**3. Configure environment variables**
+
+See [Environment Variables](#environment-variables) below.
+
+**4. Run database migrations**
+
+```bash
+npx prisma migrate dev
+npx prisma generate
+```
+
+**5. Start the development server**
+
+```bash
+npm run dev
+```
+
+**Production**
+
+```bash
+npm run build
+npm start
+```
+
+---
+
+## Environment Variables
+
+Create a `.env` file in the project root:
+
+```env
+DATABASE_URL=postgresql://user:password@host:5432/dbname
+JWT_SECRET=your-secret-key
+PORT=8080
+```
+
+| Variable | Description |
+|---|---|
+| `DATABASE_URL` | PostgreSQL connection string |
+| `JWT_SECRET` | Secret used to sign and verify JWTs |
+| `PORT` | Port the server listens on |
+
+---
+
+## API Reference
+
+**Base URL**
+
+```
+/api/v1
+```
+
+**Authentication**
+
+All protected routes require a Bearer token in the `Authorization` header:
+
+```
+Authorization: Bearer <token>
+```
+
+Tokens are issued by `POST /api/v1/users/login`.
+
+---
+
+### Users
+
+| Method | Endpoint | Protected | Description |
+|---|---|---|---|
+| `POST` | `/users/register` | No | Register a new user account |
+| `POST` | `/users/login` | No | Authenticate and receive a JWT |
+| `GET` | `/users/me` | Yes | Get the currently authenticated user |
+| `GET` | `/users` | Yes | Get all users |
+| `GET` | `/users/:id` | Yes | Get a user by ID |
+| `PUT` | `/users/:id` | Yes | Update a user by ID |
+| `DELETE` | `/users/:id` | Yes | Delete a user by ID |
+
+---
+
+### Posts
+
+| Method | Endpoint | Protected | Role | Description |
+|---|---|---|---|---|
+| `GET` | `/posts` | Yes | Any | Get all posts |
+| `GET` | `/posts/search` | Yes | Any | Search posts by keyword |
+| `GET` | `/posts/:id` | Yes | Any | Get a single post by ID |
+| `POST` | `/posts` | Yes | `AUTHOR` | Create a new post |
+| `PUT` | `/posts/:id` | Yes | `AUTHOR` | Update an existing post |
+| `DELETE` | `/posts/:id` | Yes | `AUTHOR` | Delete a post |
+
+---
+
+### Comments
+
+| Method | Endpoint | Protected | Description |
+|---|---|---|---|
+| `GET` | `/posts/:postId/comments` | Yes | Get all comments on a post |
+| `POST` | `/posts/:postId/comments` | Yes | Add a comment to a post |
+| `PUT` | `/comments/:id` | Yes | Update a comment |
+| `DELETE` | `/comments/:id` | Yes | Delete a comment |
+
+---
+
+## Authorization
+
+The API uses two middleware functions defined in `middlewear/auth.js`:
+
+**`verifyToken`**
+Validates the JWT from the `Authorization` header. Attaches the decoded user payload to `req.user`. Returns `401 Unauthorized` if the token is absent or invalid.
+
+**`isAuthor`**
+Must be used after `verifyToken`. Checks that `req.user.role === 'AUTHOR'`. Returns `403 Forbidden` if the user does not have the required role.
+
+Applied to post mutation routes:
+
+```js
+postRouter.post('/', verifyToken, isAuthor, postControllers.createPost);
+postRouter.put('/:id', verifyToken, isAuthor, postControllers.updatePost);
+postRouter.delete('/:id', verifyToken, isAuthor, postControllers.deletePost);
+```
+
+---
+
+## Error Handling
+
+All errors are caught by a global Express error handler mounted in `app.js`. Every error response follows this shape:
+
+```json
+{
+  "msg": "A human-readable error message.",
+  "error": {}
+}
+```
+
+HTTP status is taken from `err.status` when available, otherwise defaults to `500`.
+
+---
+
+## Frontend Clients
+
+| Client | Live | Repository |
+|---|---|---|
+| Reader (public) | [blog-reader-five.vercel.app](https://blog-reader-five.vercel.app/) | [blog-project](https://github.com/mansuur-iman/blog-project) |
+| Author (dashboard) | [blog-author-ten.vercel.app](https://blog-author-ten.vercel.app/login) | [blog-author](https://github.com/mansuur-iman/blog-author) |
 | [blog-author](https://github.com/mansuur-iman/blog-author) | Author dashboard (React + Vite) |
 Built as a fullstack blogging platform using Node.js, Express, Prisma, PostgreSQL, React, and Vite.
