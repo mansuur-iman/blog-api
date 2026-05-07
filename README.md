@@ -15,6 +15,9 @@ It handles authentication, authorization, blog management, comments, and databas
 
 ## Blog Project (Reader Frontend)
 
+### LIVE DEMO
+https://blog-reader-five.vercel.app/
+
 The public-facing frontend where users can:
 
 * Create accounts
@@ -51,6 +54,9 @@ npm run dev
 ## Blog Author (Author Dashboard)
 
 The dashboard frontend for authors to manage blog content.
+
+### LIVE DEMO
+https://blog-author-ten.vercel.app/login
 
 Authors can:
 
