@@ -287,7 +287,7 @@ Create a `.env` file in the root directory:
 ```env
 DATABASE_URL=your_postgresql_database_url
 JWT_SECRET=your_jwt_secret
-PORT=3000
+PORT=8080
 ```
 
 ---
