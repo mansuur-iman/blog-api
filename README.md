@@ -1,246 +1,154 @@
-# 📝 Blog API
+# Blog API
 
-A RESTful API powering a fullstack blogging platform — handling authentication, post management, comments, and role-based access control.
-
-Built with **Node.js**, **Express**, **Prisma**, and **PostgreSQL**.
+A RESTful backend API for a fullstack blogging platform. Built with Node.js, Express, Prisma, and PostgreSQL — powering two separate React frontends for readers and authors.
 
 ---
 
-## 🌐 Live Demos
+## Tech Stack
 
-| App | URL |
-|-----|-----|
-| Reader Frontend | [blog-reader-five.vercel.app](https://blog-reader-five.vercel.app/) |
-| Author Dashboard | [blog-author-ten.vercel.app/login](https://blog-author-ten.vercel.app/login) |
-
----
-
-## 📦 Project Overview
-
-This API powers two separate React frontends:
-
-**Blog Project** — public reader application where users can browse, read, comment on, and search posts.
-
-**Blog Author** — author/admin dashboard where authors can create, edit, publish, and delete content.
+- **Runtime** — Node.js
+- **Framework** — Express.js
+- **ORM** — Prisma
+- **Database** — PostgreSQL
+- **Auth** — JWT + bcrypt
+- **Other** — CORS, dotenv
 
 ---
 
-## ⚙️ Tech Stack
+## Frontends
 
-### Backend
-- Node.js + Express.js
-- Prisma ORM
-- PostgreSQL
-- JWT Authentication
-- bcrypt
-
-### Frontend (both apps)
-- React + Vite
-- React Router
-- CSS Modules
+| App | Role |
+|-----|------|
+| [Blog Reader](https://blog-reader-five.vercel.app/) | Public-facing app for browsing and reading posts |
+| [Blog Author](https://blog-author-ten.vercel.app/login) | Dashboard for authors to manage content |
 
 ---
 
-## ✨ Features
+## API Reference
 
-**Authentication & Authorization**
-- User registration and login
-- JWT-protected routes
-- Role-based access control (`READER` / `AUTHOR`)
+Base URL: `/api/v1`
 
-**Posts**
-- Create, read, update, delete posts
-- Publish / unpublish toggle
-- Search posts
+### Users — `/users`
 
-**Comments**
-- Create, read, update, delete comments
-- Comments scoped to individual posts
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| `GET` | `/users` | ✅ | Get all users |
+| `POST` | `/users/register` | — | Register a new account |
+| `POST` | `/users/login` | — | Login and receive a token |
+| `GET` | `/users/me` | ✅ | Get the authenticated user |
+| `GET` | `/users/:id` | ✅ | Get a user by ID |
+| `PUT` | `/users/:id` | ✅ | Update a user |
+| `DELETE` | `/users/:id` | ✅ | Delete a user |
 
----
+### Posts — `/posts`
 
-## 🗄️ Database Schema
-
-```prisma
-enum Role {
-  READER
-  AUTHOR
-}
-
-model User {
-  id         String    @id @default(uuid())
-  first_name String
-  last_name  String
-  username   String    @unique
-  email      String    @unique
-  password   String
-  role       Role      @default(READER)
-  posts      Post[]
-  comments   Comment[]
-  createdAt  DateTime  @default(now())
-}
-
-model Post {
-  id          String    @id @default(uuid())
-  title       String
-  text        String
-  description String?
-  imageUrl    String?
-  author      User      @relation(fields: [authorId], references: [id])
-  authorId    String
-  published   Boolean   @default(false)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  comments    Comment[]
-
-  @@index([authorId])
-}
-
-model Comment {
-  id        String   @id @default(uuid())
-  text      String
-  createdAt DateTime @default(now())
-  author    User     @relation(fields: [authorId], references: [id])
-  authorId  String
-  post      Post     @relation(fields: [postId], references: [id])
-  postId    String
-
-  @@index([authorId, postId])
-}
-```
-
----
-
-## 🛣️ API Routes
-
-### Users
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/users` | Get all users |
-| `POST` | `/users/register` | Register a new user |
-| `POST` | `/users/login` | Login |
-| `GET` | `/users/me` | Get current user |
-| `GET` | `/users/:id` | Get user by ID |
-| `PUT` | `/users/:id` | Update user |
-| `DELETE` | `/users/:id` | Delete user |
-
-### Posts
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/posts` | Get all posts |
-| `POST` | `/posts` | Create a post *(Author only)* |
-| `GET` | `/posts/search` | Search posts |
-| `GET` | `/posts/:id` | Get single post |
-| `PUT` | `/posts/:id` | Update post *(Author only)* |
-| `DELETE` | `/posts/:id` | Delete post *(Author only)* |
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| `GET` | `/posts` | ✅ | Get all posts |
+| `POST` | `/posts` | ✅ Author | Create a post |
+| `GET` | `/posts/search` | ✅ | Search posts |
+| `GET` | `/posts/:id` | ✅ | Get a single post |
+| `PUT` | `/posts/:id` | ✅ Author | Update a post |
+| `DELETE` | `/posts/:id` | ✅ Author | Delete a post |
 
 ### Comments
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/posts/:postId/comments` | Get comments for a post |
-| `POST` | `/posts/:postId/comments` | Add a comment |
-| `PUT` | `/comments/:id` | Update a comment |
-| `DELETE` | `/comments/:id` | Delete a comment |
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| `GET` | `/posts/:postId/comments` | ✅ | Get comments on a post |
+| `POST` | `/posts/:postId/comments` | ✅ | Add a comment |
+| `PUT` | `/comments/:id` | ✅ | Update a comment |
+| `DELETE` | `/comments/:id` | ✅ | Delete a comment |
 
-> Routes marked *Author only* require a valid JWT and `AUTHOR` role.
-
----
-
-## 🔐 Middleware
-
-- **`verifyToken`** — validates the JWT on protected routes
-- **`isAuthor`** — restricts access to author-only operations
+> **Auth:** ✅ = requires JWT &nbsp;|&nbsp; ✅ Author = JWT + `AUTHOR` role
 
 ---
 
-## 🚀 Getting Started
+## Middleware
 
-### 1. Clone the repository
+**`verifyToken`** — Validates the JWT on every protected route. Pass the token as a Bearer token in the `Authorization` header.
+
+**`isAuthor`** — Runs after `verifyToken`. Rejects requests from users without the `AUTHOR` role.
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- PostgreSQL database
+- npm
+
+### 1. Clone
 
 ```bash
 git clone git@github.com:mansuur-iman/blog-api.git
 cd blog-api
 ```
 
-### 2. Install dependencies
+### 2. Install
 
 ```bash
 npm install
 ```
 
-### 3. Configure environment variables
+### 3. Environment
 
-Create a `.env` file in the project root:
+Create a `.env` file in the root:
 
 ```env
-DATABASE_URL=your_postgresql_database_url
+DATABASE_URL=your_postgresql_connection_url
 JWT_SECRET=your_jwt_secret
 PORT=8080
 ```
 
-### 4. Set up the database
+### 4. Database
 
 ```bash
 npx prisma migrate dev
 npx prisma generate
 ```
 
-### 5. Start the development server
+### 5. Run
 
 ```bash
+# Development
 npm run dev
+
+# Production
+npm run build && npm start
 ```
 
 ---
 
-## 🏗️ Build & Production
-
-```bash
-# Build
-npm run build
-
-# Start production server
-npm start
-```
-
----
-
-## 📁 Project Structure
+## Project Structure
 
 ```
 blog-api/
-├── prisma/           # Prisma schema and migrations
-├── generated/        # Prisma client output
-├── controllers/      # Route handler logic
-├── routes/           # Express route definitions
-├── middlewear/       # Auth and role middleware
-├── utils/            # Helper functions
-├── app.js            # Express app setup
-├── server.js         # Server entry point
-└── package.json
+├── prisma/           # Schema and migrations
+├── generated/        # Prisma client
+├── controllers/      # Request handlers
+├── routes/           # Express routers
+├── middlewear/       # verifyToken, isAuthor
+├── utils/            # Shared helpers
+├── app.js            # Express setup
+└── server.js         # Entry point
 ```
 
 ---
 
-## 🖥️ Frontend Repositories
+## Error Handling
 
-### Blog Project (Reader)
-```bash
-git clone git@github.com:mansuur-iman/blog-project.git
-cd blog-project
-npm install
-npm run dev
+All unhandled errors are caught by a global Express error handler and returned as JSON:
+
+```json
+{
+  "msg": "Error message here",
+  "error": {}
+}
 ```
 
-### Blog Author (Dashboard)
-```bash
-git clone git@github.com:mansuur-iman/blog-author.git
-cd blog-author
-npm install
-npm run dev
-```
+HTTP status defaults to `500` unless the error carries a `.status` field.
 
 Built as a fullstack blogging platform using Node.js, Express, Prisma, PostgreSQL, React, and Vite.
